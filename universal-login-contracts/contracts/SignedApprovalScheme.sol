@@ -29,8 +29,9 @@ contract SignedApprovalScheme is KeyHolder {
         uint gasLimit;
     }
 
-    constructor(bytes32 _key) KeyHolder(_key) public {
-        requiredApprovals = 0;
+    function init(bytes32 _key) public {
+      KeyHolder.init(_key);
+      requiredApprovals = 0;
     }
 
     modifier onlyUnusedKey(uint256 executionId, bytes32 sender) {

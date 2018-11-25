@@ -1,6 +1,8 @@
+pragma solidity ^0.4.24;
+
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "openzeppelin-solidity/contracts/AddressUtils.sol";
-
+import './IdentityFactory.sol';
 
 contract InviteLinkScheme { 
   using AddressUtils for address;
@@ -20,8 +22,8 @@ contract InviteLinkScheme {
       receiverWallet = address(receiverPubKey);
     } else {
       // 0x477be1f1b5cd97125789ac0ed05c501b9c325283 - old address
-      IdentityFactory _identityFactory = IdentityFactory(0xa65442d12940671602344cc843dfc8c77b1dad4e);
-      receiverWallet = _identityFactory.createIdentity(receiverPubKey, _hashLabel, _name, _node, ens, registrar, resolver);
+      IdentityFactory _identityFactory = IdentityFactory(0xA65442d12940671602344Cc843dfc8c77b1DAD4E);
+      receiverWallet = _identityFactory.createIdentity(receiverPubKey);
     }
     
     /* ERC20 token = ERC20(tokenAddress); */
