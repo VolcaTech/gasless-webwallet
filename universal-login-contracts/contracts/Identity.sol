@@ -4,7 +4,7 @@ import "./ERC1077.sol";
 import './InviteLinkScheme.sol';
 
 
-contract Identity is ERC1077 {
+contract Identity is ERC1077, InviteLinkScheme {
   constructor(bytes32 _key) payable public  {
     ERC1077.init(_key);
   }

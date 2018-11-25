@@ -13,7 +13,6 @@ contract IdentityFactory is Ownable, CloneFactory {
   
   event IdentityCreated(address newIdentityAddr);
   
-  
   function setLibraryAddress(address _libraryAddress) public onlyOwner {
     libraryAddress = _libraryAddress;
   }
@@ -23,11 +22,14 @@ contract IdentityFactory is Ownable, CloneFactory {
   }
 
   function createIdentity(bytes32 _key) public returns(address) {
-
+    
     // only one identity contract per public key
     require(getIdentity(_key) == 0x0);
     
     address newIdentityAddr = createClone(libraryAddress);
+
+    identitiesDct[_key] = newIdentityAddr;
+    
     Identity(newIdentityAddr).init(_key);
     
     emit IdentityCreated(newIdentityAddr);
