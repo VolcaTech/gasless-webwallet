@@ -3,7 +3,7 @@ import IdentityRouter from './routes/identity';
 import ConfigRouter from './routes/config';
 import RequestAuthorisationRouter from './routes/authorisation';
 import IdentityService from './services/IdentityService';
-import ENSService from './services/ensService';
+//import ENSService from './services/ensService';
 import bodyParser from 'body-parser';
 import ethers from 'ethers';
 import cors from 'cors';
@@ -36,7 +36,7 @@ class Relayer {
       origin : '*',
       credentials: true
     }));
-    this.ensService = new ENSService(this.config.chainSpec.ensAddress, this.config.ensRegistrars);
+    //this.ensService = new ENSService(this.config.chainSpec.ensAddress, this.config.ensRegistrars);
     this.authorisationService = new AuthorisationService();
     this.identityService = new IdentityService(this.wallet, this.ensService, this.authorisationService, this.hooks, this.provider);
     this.app.use(bodyParser.json());
