@@ -1,14 +1,15 @@
 pragma solidity ^0.4.24;
 
-import "./ENSRegistered.sol";
 import "./ERC1077.sol";
+import './InviteLinkScheme.sol';
 
 
-contract Identity is ENSRegistered, ERC1077 {
-    constructor(
-        bytes32 _key, bytes32 _hashLabel, string _name, bytes32 _node, ENS ens, FIFSRegistrar registrar, PublicResolver resolver) 
-        payable public
-        ENSRegistered(_hashLabel, _name, _node, ens, registrar, resolver)
-        ERC1077(_key) {
-    }
+contract Identity is ERC1077, InviteLinkScheme {
+  constructor(bytes32 _key) payable public  {
+    ERC1077.init(_key);
+  }
+
+  function init(bytes32 _key) public {
+    ERC1077.init(_key);
+  }  
 }

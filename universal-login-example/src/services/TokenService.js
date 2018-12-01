@@ -9,7 +9,7 @@ class TokenService {
   }
 
   async getBalance(address) {
-    return utils.formatEther(await this.tokenContract.balanceOf(address));
+    return this.tokenContract.balanceOf(address);
   }
 }
 

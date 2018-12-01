@@ -1,6 +1,6 @@
 import ethers, {providers, utils, Interface} from 'ethers';
-import ENS from 'universal-login-contracts/build/ENS';
-import PublicResolver from 'universal-login-contracts/build/PublicResolver';
+//import ENS from 'universal-login-contracts/build/ENS';
+//import PublicResolver from 'universal-login-contracts/build/PublicResolver';
 import ERC20 from 'universal-login-contracts/build/ERC20';
 import Identity from 'universal-login-contracts/build/Identity';
 
@@ -53,11 +53,11 @@ const hasEnoughToken = async (gasToken, identityAddress, gasLimit, provider) => 
 };
 
 const lookupAddress = async (provider, address) => {
-  const node = namehash(`${address.slice(2)}.addr.reverse`.toLowerCase());
-  const ens = new ethers.Contract(provider.ensAddress, ENS.interface, provider);
-  const resolver = await ens.resolver(node);
-  const contract = new ethers.Contract(resolver, PublicResolver.interface, provider);
-  return await contract.name(node);
+  // const node = namehash(`${address.slice(2)}.addr.reverse`.toLowerCase());
+  // const ens = new ethers.Contract(provider.ensAddress, ENS.interface, provider);
+  // const resolver = await ens.resolver(node);
+  // const contract = new ethers.Contract(resolver, PublicResolver.interface, provider);
+  // return await contract.name(node);
 };
 
 const isAddKeyCall = (data) => {

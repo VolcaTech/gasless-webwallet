@@ -1,4 +1,3 @@
-
 pragma solidity ^0.4.24;
 import "./ERC725KeyHolder.sol";
 
@@ -7,7 +6,7 @@ contract KeyHolder is ERC725KeyHolder {
     mapping (bytes32 => Key) public keys;
     mapping (uint256 => bytes32[]) keysByPurpose;
 
-    constructor(bytes32 _key) public {
+    function init(bytes32 _key) public {
         keys[_key].key = _key;
         keys[_key].purpose = MANAGEMENT_KEY;
         keys[_key].keyType = ECDSA_TYPE;
