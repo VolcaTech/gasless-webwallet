@@ -53,6 +53,21 @@ class EthereumIdentitySDK {
 	
 	const sigReceiver = transitWallet.signMessage(utils.arrayify(messageHash));
 
+	// check that link is valid
+	const contract = new ethers.Contract(sender, Identity.interface, this.provider);
+	const isLinkValid =  await contract.isLinkValid(
+	    token,
+	    amount,  
+	    identityPubKey,
+	    transitPubKey,
+	    sigSender,
+	    sigReceiver	    
+	);
+	console.log({isLinkValid});
+	if (!isLinkValid) {
+	    throw new Error("Invalid link!");
+	}
+	
 	const body = JSON.stringify({
 	    identityPubKey,
 	    sigSender,
@@ -72,6 +87,14 @@ class EthereumIdentitySDK {
 	throw new Error(`${responseJson.error}`);	
     }
 
+    async hasLinkBeenUsed({transitPK, sender}) {
+	const transitWallet = new ethers.Wallet(transitPK, this.provider);
+	const contract = new ethers.Contract(sender, Identity.interface, this.provider);
+	return await contract.hasBeenUsed(transitWallet.address);
+    }
+
+    
+    
     waitForTxReceipt(txHash) {
 	return waitForTransactionReceipt(this.provider, txHash);	
     }
