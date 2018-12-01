@@ -1,4 +1,4 @@
-import ethers, {utils, Interface} from 'ethers';
+import ethers, {utils, Interface, Wallet} from 'ethers';
 import Identity from 'universal-login-contracts/build/Identity';
 import {OPERATION_CALL,MANAGEMENT_KEY, ECDSA_TYPE, ACTION_KEY} from 'universal-login-contracts';
 import {addressToBytes32, waitForContractDeploy, waitForTransactionReceipt} from './utils/utils';
@@ -9,6 +9,7 @@ import BlockchainObserver from './observers/BlockchainObserver';
 import {headers, fetch} from './utils/http';
 import {MESSAGE_DEFAULTS} from './config';
 
+
 class EthereumIdentitySDK {
   constructor(relayerUrl, providerOrUrl, paymentOptions) {
     this.provider = typeof(providerOrUrl) === 'string' ? new ethers.JsonRpcProvider(providerOrUrl) : providerOrUrl;
@@ -18,13 +19,13 @@ class EthereumIdentitySDK {
     this.defaultPaymentOptions = {...MESSAGE_DEFAULTS, ...paymentOptions};
   }
 
-  async create(ensName) {
+  async create() {
     const privateKey = this.generatePrivateKey();
     const wallet = new ethers.Wallet(privateKey, this.provider);
     const managementKey = wallet.address;
     const url = `${this.relayerUrl}/identity`;
     const method = 'POST';
-    const body = JSON.stringify({managementKey, ensName});
+    const body = JSON.stringify({managementKey});
     const response = await fetch(url, {headers, method, body});
     const responseJson = await response.json();
     if (response.status === 201) {
@@ -34,6 +35,65 @@ class EthereumIdentitySDK {
     throw new Error(`${responseJson.error}`);
   }
 
+
+    async transferByLink({ token, amount, sender, sigSender, transitPK, identityPK=null }) {
+
+	// generate new private key if none is provided
+	identityPK = identityPK || this.generatePrivateKey();
+	const identityPubKey = new ethers.Wallet(identityPK, this.provider).address;
+	const transitWallet = new ethers.Wallet(transitPK, this.provider);
+	const transitPubKey = transitWallet.address;
+	const url = `${this.relayerUrl}/identity/transfer-by-link`;
+	const method = 'POST';
+
+	const messageHash = utils.solidityKeccak256(
+	    ['address', 'address'],
+	    [ identityPubKey, transitPubKey]
+	);
+	
+	const sigReceiver = transitWallet.signMessage(utils.arrayify(messageHash));
+
+	const body = JSON.stringify({
+	    identityPubKey,
+	    sigSender,
+	    sigReceiver,
+	    token,
+	    amount,
+	    transitPubKey,
+	    sender
+	});
+	
+	const response = await fetch(url, {headers, method, body});
+	const responseJson = await response.json();
+	if (response.status === 201) {
+
+	    const receipt = await waitForTransactionReceipt(this.provider, responseJson.transaction.hash);
+	    console.log({receipt});
+	    return {identityPK, identityPubKey, receipt};
+	}
+	throw new Error(`${responseJson.error}`);	
+    }
+
+
+    generateLink({ privateKey, token, amount }) {
+
+	// generate transit private key
+	const transitPK = this.generatePrivateKey();
+	const wallet = new ethers.Wallet(privateKey, this.provider);
+	const transitPubKey = new ethers.Wallet(transitPK, this.provider).address;
+
+	// sign transit private key	
+	const messageHash = utils.solidityKeccak256(
+	    ['address', 'uint', 'address'],
+	    [ token, amount, transitPubKey]
+	);
+	
+	const sigSender = wallet.signMessage(utils.arrayify(messageHash));
+	
+	
+	return { sigSender, transitPK };
+    }
+    
   async addKey(to, publicKey, privateKey, transactionDetails) {
     const key = addressToBytes32(publicKey);
     const {data} = new Interface(Identity.interface).functions.addKey(key, MANAGEMENT_KEY, ECDSA_TYPE);
