@@ -29,6 +29,22 @@ class LinkAccount extends Component {
 	    fetchingBalance: false
 	});
     }
+
+    _logout() {
+	const result = confirm("Are you sure you want to logout?");
+	if (result) {
+	    localStorage.clear();
+	    window.location.reload();
+	}
+    }
+    
+    _renderLogout() {
+	return (
+		<div style={{marginTop: 40}}>
+		<button style={{color: 'red' }}  onClick={this._logout.bind(this)}> Logout </button>
+		</div>
+	)
+    }
     
     _renderAccount() {
 	let balance;
@@ -43,7 +59,9 @@ class LinkAccount extends Component {
 		<div style={{paddingTop: 20, paddingBottom: 20}}>
 		<h2> Your account </h2>
 		<div style={{paddingTop: 20, paddingBottom: 10}}> Address: <EtherscanAddressLink address={this.state.identity} /> </div>
-		<div> Balance: {balance} </div>		
+		<div> Balance: {balance} </div>
+		<hr/>
+		{this._renderLogout() }
 		</div>
 	);
     }
