@@ -1,41 +1,55 @@
 import React, {Component} from 'react';
 import ethers from 'ethers';
 import FaucetLink from './Faucet';
+import { EtherscanLink, EtherscanAddressLink } from './common';
 
 class LinkAccount extends Component {
     constructor(props) {
 	super(props);
-	this.state = {
-	    identity: null, 
-	    privateKey: null
-	};
-    }
 
-    // async createIdentity() {
-    // 	try { 
-    // 	    console.log("in create") ;
-    // 	    const [senderPrivateKey, senderIdentity] = await this.sdk.create();
-    // 	    console.log({senderPrivateKey, senderIdentity});
-    // 	    this.setState({
-    // 		senderPrivateKey, senderIdentity
-    // 	    });
-	    
-    // 	} catch (err) { 
-    // 	    console.log("err: ", err);
-    // 	}	
-    // }
-    
+	// get identity address from localstorage
+	const identityPK = localStorage.getItem("LINKS_IDENTITY_PK");
+	const identity = localStorage.getItem("LINKS_IDENTITY");
+	
+	this.state = {
+	    identity, 
+	    identityPK,
+	    balance: 0,
+	    fetchingBalance: true
+	};
+    }    
+
+    async componentDidMount() {
+	if (!this.state.identity) { return null;}
+	
+	const balance = await this.props.tokenService.getBalance(this.state.identity);
+	console.log({balance});
+	this.setState({
+	    balance,
+	    fetchingBalance: false
+	});
+    }
     
     _renderAccount() {
+	let balance;
+	if (this.state.fetchingBalance) {
+	    balance = "...";
+	} else {
+	    balance = this.state.balance / 100;
+	}
+	
+	
 	return (
 		<div style={{paddingTop: 20, paddingBottom: 20}}>
-		<h2> Your account </h2> 
+		<h2> Your account </h2>
+		<div style={{paddingTop: 20, paddingBottom: 10}}> Address: <EtherscanAddressLink address={this.state.identity} /> </div>
+		<div> Balance: {balance} </div>		
 		</div>
 	);
     }
     
     render() {
-	return this.state.privateKey ? (<this._renderAccount/>) : (<FaucetLink sdk={this.props.sdk} />);
+	return this.state.identityPK ? this._renderAccount() : (<FaucetLink sdk={this.props.sdk} />);
     }
 }
 

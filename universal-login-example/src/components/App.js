@@ -7,6 +7,8 @@ import {
     Switch,
     Redirect
 } from "react-router-dom";
+import TokenService from '../services/TokenService';
+import { TOKEN_ADDRESS } from './constants';
 import LinkAccount from './LinkAccount';
 import ClaimLink from './ClaimLink';
 
@@ -21,6 +23,8 @@ class App extends Component {
 	    serverUrl,
 	    this.provider,
 	);
+
+	this.tokenService = new TokenService(TOKEN_ADDRESS, this.provider);
     }
 
     componentDidMount() {
@@ -39,7 +43,7 @@ class App extends Component {
 		<Router>
 		<Switch>
 		<Route path="/claim" component={(props) => <ClaimLink {...props} sdk={this.sdk} />} />		
-		<Route component={(props) => (<LinkAccount {...props} sdk={this.sdk} />)} />
+		<Route component={(props) => (<LinkAccount {...props} sdk={this.sdk} tokenService={this.tokenService} />)} />
 		
 		</Switch>
 		

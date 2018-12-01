@@ -3,20 +3,7 @@ import ethers from 'ethers';
 import FaucetLink from './Faucet';
 const qs = require('querystring');
 import { TOKEN_ADDRESS } from './constants';
-
-const EtherscanLink = ({txHash}) => {
-    const link = `https://ropsten.etherscan.io/tx/${txHash}`;
-    return (
-	    <a style={{color: '#0099ff', textDecoration: 'underline'}} href={link} target="_blank">{txHash}</a>
-    );
-}
-
-const EtherscanAddressLink = ({address}) => {
-    const link = `https://ropsten.etherscan.io/address/${address}`;
-    return (
-	    <a style={{color: '#0099ff', textDecoration: 'underline'}} href={link} target="_blank">{address}</a>
-    );
-}
+import { EtherscanLink, EtherscanAddressLink } from './common';
 
 
 class ClaimLink extends Component {
@@ -166,7 +153,7 @@ class ClaimLink extends Component {
 	const claimTo = this.state.newIdentity ? "New account" : (<EtherscanAddressLink address={this.state.identity} />);
 	return (
 		<div>
-		<div style={{paddingTop: 10}}> Amount: {this.state.amount / 100} DAI </div>
+		<div style={{paddingTop: 10}}> Amount: {this.state.amount / 100} USD </div>
 		<div style={{paddingTop: 10}}> Claim To: {claimTo} </div>
 		</div>
 	);
