@@ -110327,7 +110327,7 @@ var App = function (_Component) {
 
 						var _this = (0, _possibleConstructorReturn3.default)(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
 
-						var serverUrl = 'http://ropsten.eth2phone.com:3005';
+						var serverUrl = 'https://ropsten.eth2phone.com';
 						_this.provider = new _ethers2.default.providers.JsonRpcProvider('https://ropsten.infura.io');
 
 						_this.sdk = new _universalLoginSdk2.default(serverUrl, _this.provider);
