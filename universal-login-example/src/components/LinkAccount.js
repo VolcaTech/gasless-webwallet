@@ -37,13 +37,17 @@ class LinkAccount extends Component {
 	    window.location.reload();
 	}
     }
+
+    _renderSendBtn() {
+	return ( <a href="/#/send"> <button style={{ marginTop: 20, width: 100}} className="btn fullwidth">Send $ </button></a>);
+    }
     
     _renderLogout() {
 	return (
 		<div style={{marginTop: 40}}>
 		<button style={{color: 'red' }}  onClick={this._logout.bind(this)}> Logout </button>
 		</div>
-	)
+	);
     }
     
     _renderAccount() {
@@ -51,7 +55,7 @@ class LinkAccount extends Component {
 	if (this.state.fetchingBalance) {
 	    balance = "...";
 	} else {
-	    balance = this.state.balance / 100;
+	    balance = `${this.state.balance / 100} USD`;
 	}
 	
 	
@@ -60,7 +64,9 @@ class LinkAccount extends Component {
 		<h2> Your account </h2>
 		<div style={{paddingTop: 20, paddingBottom: 10}}> Address: <EtherscanAddressLink address={this.state.identity} /> </div>
 		<div> Balance: {balance} </div>
+		
 		<hr/>
+		{ this._renderSendBtn() }
 		{this._renderLogout() }
 		</div>
 	);

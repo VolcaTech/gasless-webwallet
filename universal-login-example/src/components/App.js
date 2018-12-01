@@ -11,6 +11,7 @@ import TokenService from '../services/TokenService';
 import { TOKEN_ADDRESS } from './constants';
 import LinkAccount from './LinkAccount';
 import ClaimLink from './ClaimLink';
+import SendLink from './Send';
 
 class App extends Component {
     constructor(props) {
@@ -42,7 +43,8 @@ class App extends Component {
 		<div className="container">
 		<Router>
 		<Switch>
-		<Route path="/claim" component={(props) => <ClaimLink {...props} sdk={this.sdk} />} />		
+		<Route path="/claim" component={(props) => <ClaimLink {...props} sdk={this.sdk} />} />
+		<Route path="/send" component={(props) => <SendLink {...props} tokenService={this.tokenService} sdk={this.sdk} />} />				
 		<Route component={(props) => (<LinkAccount {...props} sdk={this.sdk} tokenService={this.tokenService} />)} />
 		
 		</Switch>
