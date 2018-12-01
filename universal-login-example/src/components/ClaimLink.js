@@ -4,6 +4,12 @@ import FaucetLink from './Faucet';
 const qs = require('querystring');
 import { TOKEN_ADDRESS } from './constants';
 
+const EtherscanLink = (txHash) => {
+    const link = `https://ropsten.etherscan.io/tx/${this.state.txHash}`;
+    return (
+	    <a style={{color: '#0099ff', textDecoration: 'underline'}} href={link} target="_blank">txHash</a>
+    );
+}
 
 class ClaimLink extends Component {
     constructor(props) {
@@ -83,24 +89,23 @@ class ClaimLink extends Component {
 	    return ( <button style={{ marginTop: 20, width: 100}} className={btnClass} onClick={this.claimLink.bind(this)}> <div>Claim </div></button>);
 	}
 
+	// tx sent but not mined yet
 	if (!this.state.txReceipt) { 
 	    return (
 		    <div>
-		    Pending Tx... <a style={{color: '#0099ff', textDecoration: 'underline'}} href={`https://ropsten.etherscan.io/tx/${this.state.txHash}`} target="_blank">txHash</a>
+		    Pending Tx... <EtherscanLink txHash={this.state.txHash} />
 		    </div>
 	    );
 	}
-
 	
 	// tx was mined
 	return (
 		<div>
-		<div style={{paddingTop: 20, paddingBottom: 10}}> Mined Tx: <a style={{color: '#0099ff', textDecoration: 'underline'}} href={`https://ropsten.etherscan.io/tx/${this.state.txHash}`} target="_blank">txHash</a>
+		<div style={{paddingTop: 20, paddingBottom: 10}}> Mined Tx: <EtherscanLink txHash={this.state.txHash} />
 		</div>
 		<div>
 		Claimed To: { this.state.identity } 
 	    </div>
-		
 		</div>
 	);	
     }
