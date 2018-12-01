@@ -178,7 +178,15 @@ class ClaimLink extends Component {
 		<h2> Claim Link </h2>
 		{ this._renderLinkDetails() }
 	     <hr/>
-	    { this._renderClaimBtn() }
+		{ this._renderClaimBtn() }
+
+	    { this.state.identity ?
+	      <div style={{marginTop: 40}}>
+	      <a style={{color: '#0099ff', textDecoration: 'underline'}} href="/#/"> Go to Your Account </a>
+	      </div>
+	      : null
+	      
+	    } 
 		</div>
 	);
     }
