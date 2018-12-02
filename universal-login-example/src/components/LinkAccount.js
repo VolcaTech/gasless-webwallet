@@ -31,7 +31,7 @@ class LinkAccount extends Component {
     }
 
     _logout() {
-	const result = confirm("Are you sure you want to logout?");
+	const result = confirm("Are you sure you want to burn wallet?");
 	if (result) {
 	    localStorage.clear();
 	    window.location.reload();
@@ -45,7 +45,7 @@ class LinkAccount extends Component {
     _renderLogout() {
 	return (
 		<div style={{marginTop: 40}}>
-		<button style={{color: 'red' }}  onClick={this._logout.bind(this)}> Logout </button>
+		<button style={{color: 'red' }}  onClick={this._logout.bind(this)}> Burn wallet </button>
 		</div>
 	);
     }
