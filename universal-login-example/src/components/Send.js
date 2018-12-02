@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import { TOKEN_ADDRESS } from './constants';
-
+import copy from 'copy-to-clipboard';
 
 class SendForm extends Component {    
 
@@ -15,7 +15,9 @@ class SendForm extends Component {
 	    identityPK,
 	    balance: 0,
 	    fetchingBalance: true,
-	    amount: 1
+	    amount: 1,
+	    copyBtnClicked: false,
+	    link: null
 	};
     }    
 
@@ -26,12 +28,30 @@ class SendForm extends Component {
 	console.log({balance});
 	this.setState({
 	    balance,
-	    fetchingBalance: false
+	    fetchingBalance: false,
+	    link: this.generateLink(this.state.amount, balance)
 	});
     }
+
+
+    _renderCopyBtn(link) {
+
+	const label = this.state.copyBtnClicked ? "Copied!" : "Copy the link";
+	const className = this.state.copyBtnClicked ? "btn fullwidth disabled" : "btn fullwidth";
+	return ( <button
+		 style={{ marginTop: 20, width: 250}}
+		 className={className} onClick={() =>  {
+	    copy(link);
+	    this.setState({
+		copyBtnClicked: true
+	    })
+	}}> {label} </button>);
+    }
+
     
-    generateLink() {
-	let { identity, identityPK, amount, balance } = this.state;
+    generateLink(value, balance) {
+	let { identity, identityPK } = this.state;
+	let amount = value;
 	amount = amount * 100;
 	const bal = (balance);
 	if (amount > bal) {
@@ -39,38 +59,37 @@ class SendForm extends Component {
 	}
 	if (amount <= 0) {
 	    return `You should add amount!`;
-	}
-
-	
+	}	
 	
 	const { sigSender, transitPK } = this.props.sdk.generateLink({privateKey: identityPK, token: TOKEN_ADDRESS, amount}); 
-
-	const link = 'http://' + window.location.host + `/#/claim?sig=${sigSender}&pk=${transitPK}&a=${amount}&from=${identity}`;
+	
+	const link = `${window.location.protocol}//${window.location.host}/#/claim?sig=${sigSender}&pk=${transitPK}&a=${amount}&from=${identity}`;
 	return link;
     }
     
     
     render() {
-	let link;
-	try { 
-	    link = this.generateLink();
-	} catch(err) {
-	    console.log(err);
-	    link = "Error";
-	}
+
 	return ( 
 		<div style={{paddingTop: 20, paddingBottom: 20}}>
-		<h3 style={{paddingBottom: 20}}> Your balance {this.state.balance / 100} USD</h3>
+		<h3 style={{paddingBottom: 20}}> Your balance: ${this.state.balance / 100}</h3>
 		<div>
-		<input className="input" type="text" value={this.state.amount} onChange={({target}) => this.setState({amount: target.value})} />
+		<input className="input" type="text" value={this.state.amount} onChange={({target}) => this.setState({
+		    amount: target.value,
+		    copyBtnClicked: false,
+		    link: this.generateLink(target.value, this.state.balance)
+		})} />
 		<div style={{marginTop: 20}}>
 		
 		<h3> Share this link with receiver </h3>
-		<div style={{marginTop: 10}}>
-		<input className="input" type="text" value={link} />
+		<div style={{marginTop: 10, marginBottom: 10}}>
+		<input className="input" type="text" value={this.state.link} />
 		</div>
+		{ this._renderCopyBtn(this.state.link) }
+		
 		</div>
 
+		
 	      <div style={{marginTop: 40}}>
 	      <a style={{color: '#0099ff', textDecoration: 'underline'}} href="/#/"> Go to Your Account </a>
 	      </div>
