@@ -21,6 +21,7 @@ class ClaimLink extends Component {
 	// get identity address from localstorage
 	const identityPK = localStorage.getItem("LINKS_IDENTITY_PK");
 	const identity = localStorage.getItem("LINKS_IDENTITY");	
+	const pendingTxHash = localStorage.getItem("LINKS_PENDING_TX_HASH");
 	
 	this.state = {
 	    // identity 
@@ -37,7 +38,7 @@ class ClaimLink extends Component {
 	    // claim tx
 	    checkingLink: true,
 	    usedLink: false,
-	    txHash: null,
+	    txHash: pendingTxHash,
 	    txReceipt: null,
 	    disabled: false,
 	};
@@ -50,7 +51,32 @@ class ClaimLink extends Component {
     	this.setState({
     	    checkingLink: false,
     	    usedLink: result
-    	})
+    	});
+
+	if (this.state.txHash) {
+	    let newIdentity;
+	    const txReceipt = await this.props.sdk.waitForTxReceipt(this.state.txHash);
+	    console.log({txReceipt});
+	    
+	    if (this.state.newIdentity) {
+		newIdentity = txReceipt.logs[0] && txReceipt.logs[0].address;
+
+		this.setState({
+
+		});
+		
+		localStorage.setItem("LINKS_IDENTITY", newIdentity);
+	    }
+	    
+	    this.setState({
+		txReceipt,
+		identity: this.state.identity || newIdentity
+	    });
+
+	    
+	    localStorage.removeItem("LINKS_PENDING_TX_HASH");
+	}
+	
     }
     
     async claimLink() {
@@ -74,7 +100,9 @@ class ClaimLink extends Component {
 		transitPK, identityPK
 	    });
 	    console.log({response, txHash, newIdentityPK});
-	    
+	    // store pending tx Hash
+	    localStorage.setItem("LINKS_PENDING_TX_HASH", txHash);
+	    localStorage.setItem("LINKS_IDENTITY_PK", newIdentityPK);
 	    this.setState({
 		txHash
 	    });
@@ -100,8 +128,10 @@ class ClaimLink extends Component {
 	    // #todo store identity PK in localstorage 
 	    
 	} catch (err) {
-	    console.log("Error: ", err);
-	    alert("Error while claiming tx! Details in the console");
+	    console.log({err});
+	    if (err.search("Error: invalid json response at XMLHttpRequest.request.onreadystatechange") !== 0) { 
+		alert("Error while claiming tx! Details in the console");
+	    }
 	}
     }
 
@@ -109,6 +139,7 @@ class ClaimLink extends Component {
 	console.log("saving new identity to localstorgae");
 	localStorage.setItem("LINKS_IDENTITY_PK", identityPK);
 	localStorage.setItem("LINKS_IDENTITY", identity);
+	localStorage.removeItem("LINKS_PENDING_TX_HASH");	
 	console.log("new identity saved!");
     }
     
@@ -153,7 +184,7 @@ class ClaimLink extends Component {
 	const claimTo = this.state.newIdentity ? "New account" : (<EtherscanAddressLink address={this.state.identity} />);
 	return (
 		<div>
-		<div style={{paddingTop: 10}}> Amount: {this.state.amount / 100} USD </div>
+		<div style={{paddingTop: 10}}> Amount: ${this.state.amount / 100}</div>
 		<div style={{paddingTop: 10}}> Claim To: {claimTo} </div>
 		</div>
 	);

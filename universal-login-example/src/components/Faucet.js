@@ -24,9 +24,9 @@ export default class FaucetLink extends Component {
 		<div style={{paddingTop: 20, paddingBottom: 20}}>
 		<h3 style={{paddingBottom: 20}}> You have no account yet </h3>
 		<div>
-		<div> Follow the link below to get some DAI and get new account</div>
+		<div> Follow the link below to get some $ and get new account</div>
 		<div style={{marginTop: 10}}>
-		<a style={{color: '#0099ff', textDecoration: 'underline'}} href={faucetLink}>Follow this link to get 10 DAIs</a>
+		<a style={{color: '#0099ff', textDecoration: 'underline'}} href={faucetLink}>Follow this link to get $100</a>
 		</div>
 	    </div>
 		</div>

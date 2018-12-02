@@ -60,7 +60,7 @@ class SendForm extends Component {
 	}
 	return ( 
 		<div style={{paddingTop: 20, paddingBottom: 20}}>
-		<h3 style={{paddingBottom: 20}}> Your balance {this.state.balance / 100} USD</h3>
+		<h3 style={{paddingBottom: 20}}> Your balance: ${this.state.balance / 100}</h3>
 		<div>
 		<input className="input" type="text" value={this.state.amount} onChange={({target}) => this.setState({amount: target.value})} />
 		<div style={{marginTop: 20}}>
