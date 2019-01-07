@@ -30,19 +30,19 @@ contract InviteLinkScheme is KeyHolder {
     
     // 1. check that transitPubKey and transfer params were signed by sender
     require(checkSenderSignature(
-				 transitPubKey,
-				 tokenAddress,
-				 tokenAmount,
-				 sigSender
-				 ));
+    				 transitPubKey,
+    				 tokenAddress,
+    				 tokenAmount,
+    				 sigSender
+    				 ));
 
-    // 2. check that Receiver's address was signed by transit key
+    /* // 2. check that Receiver's address was signed by transit key */
     require(checkReceiverSignature(
-				   receiverAddress,
-				   transitPubKey,
-				   sigReceiver));
+    				   receiverAddress,
+    				   transitPubKey,
+    				   sigReceiver));
 
-    // 3. check that link hasn't been used before
+    /* // 3. check that link hasn't been used before */
     require(hasBeenUsed(transitPubKey) == false);
 
     return true;
