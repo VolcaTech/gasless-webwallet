@@ -36,11 +36,7 @@ class EthereumIdentitySDK {
   }
 
 
-    async transferByLink({ token, amount, sender, sigSender, transitPK, identityPK=null }) {
-
-	// generate new private key if none is provided
-	identityPK = identityPK || this.generatePrivateKey();
-	const identityPubKey = new ethers.Wallet(identityPK, this.provider).address;
+    async transferByLink({ token, amount, sender, sigSender, transitPK, receiverPubKey }) {
 	const transitWallet = new ethers.Wallet(transitPK, this.provider);
 	const transitPubKey = transitWallet.address;
 	const url = `${this.relayerUrl}/identity/transfer-by-link`;
@@ -48,7 +44,7 @@ class EthereumIdentitySDK {
 
 	const messageHash = utils.solidityKeccak256(
 	    ['address', 'address'],
-	    [ identityPubKey, transitPubKey]
+	    [ receiverPubKey, transitPubKey]
 	);
 	
 	const sigReceiver = transitWallet.signMessage(utils.arrayify(messageHash));
@@ -58,7 +54,7 @@ class EthereumIdentitySDK {
 	const isLinkValid =  await contract.isLinkValid(
 	    token,
 	    amount,  
-	    identityPubKey,
+	    receiverPubKey,
 	    transitPubKey,
 	    sigSender,
 	    sigReceiver	    
@@ -69,7 +65,7 @@ class EthereumIdentitySDK {
 	}
 	
 	const body = JSON.stringify({
-	    identityPubKey,
+	    identityPubKey: receiverPubKey,
 	    sigSender,
 	    sigReceiver,
 	    token,
@@ -82,7 +78,7 @@ class EthereumIdentitySDK {
 	const responseJson = await response.json();
 	console.log({response, responseJson});
 	if (response.status === 201) {
-	    return { response, txHash: responseJson.transaction.hash, identityPK };
+	    return { response, txHash: responseJson.transaction.hash };
 	}
 	throw new Error(`${responseJson.error}`);	
     }
@@ -99,21 +95,24 @@ class EthereumIdentitySDK {
 	return waitForTransactionReceipt(this.provider, txHash);	
     }
     
-    generateLink({ privateKey, token, amount }) {
-
+    generateLink({ privateKey, token, amount, transitPrivKey=null }) {
+	console.log("in generate link")
 	// generate transit private key
-	const transitPK = this.generatePrivateKey();
+	const transitPK = transitPrivKey || this.generatePrivateKey();
+	console.log("generated transit PK");
 	const wallet = new ethers.Wallet(privateKey, this.provider);
+	console.log(" signing wallet ");	
 	const transitPubKey = new ethers.Wallet(transitPK, this.provider).address;
-
+	console.log("got transit PK")
 	// sign transit private key	
 	const messageHash = utils.solidityKeccak256(
 	    ['address', 'uint', 'address'],
 	    [ token, amount, transitPubKey]
 	);
-	
+
+	console.log("calculated message Hash")
 	const sigSender = wallet.signMessage(utils.arrayify(messageHash));
-	
+	console.log("got sig sender")
 	
 	return { sigSender, transitPK };
     }
