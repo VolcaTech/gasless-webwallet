@@ -36,27 +36,30 @@ class App extends Component {
 	this.sdk.stop()	
     }
 
+        	// 	
+    		// <Route path="/send" component={(props) => <SendLink {...props} tokenService={this.tokenService} sdk={this.sdk} />} />				
+
+    		// <Route component={(props) => (<LinkAccount {...props} sdk={this.sdk} tokenService={this.tokenService} />)} />
+
+    
     render() {
 
-	return (
-		<div className="login-view">
-		<div className="container">
-		<Router>
-		<Switch>
-		<Route path="/claim" component={(props) => <ClaimLink {...props} sdk={this.sdk} />} />
-		<Route path="/send" component={(props) => <SendLink {...props} tokenService={this.tokenService} sdk={this.sdk} />} />				
-		<Route component={(props) => (<LinkAccount {...props} sdk={this.sdk} tokenService={this.tokenService} />)} />
+	const LinkAccountComponent = (props) => (<LinkAccount {...props} sdk={this.sdk} tokenService={this.tokenService} />);
+	
+    	return (
+    		<div className="login-view">
+    		<div className="container">
+    		<Router>
+    		<Switch>
+		<Route path="/send" component={(props) => <SendLink tokenService={this.tokenService} sdk={this.sdk} />} />
+		<Route path="/claim" component={(props) => <ClaimLink location={props.location} sdk={this.sdk} />} />
+    		<Route component={LinkAccountComponent} />
+    		</Switch>
+    		</Router>   
+    		</div>
+    		</div>
 		
-		</Switch>
-		
-		
-		</Router>   
-		
-
-		</div>
-		</div>
-		
-	);
+    	);
     }
 }
 
