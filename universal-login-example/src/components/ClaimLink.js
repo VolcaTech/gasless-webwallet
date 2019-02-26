@@ -44,8 +44,8 @@ class ClaimLink extends Component {
 	};
     }
 
-    async componentDidMount() {
-    	const {transitPK, sender} = this.state;
+    async _checkLink() {
+	const {transitPK, sender} = this.state;		
     	const result = await this.props.sdk.hasLinkBeenUsed({transitPK, sender});
     	console.log({result});
     	this.setState({
@@ -75,11 +75,15 @@ class ClaimLink extends Component {
 
 	    
 	    localStorage.removeItem("LINKS_PENDING_TX_HASH");
-	}
-	
+	}	
     }
     
-    async claimLink() {
+    componentDidMount() {
+	this._checkLink();
+    }
+
+    
+    claimLink() {
 	console.log("In a claim link");
 	if (this.state.disabled) { return false; }
 	const {
@@ -91,50 +95,63 @@ class ClaimLink extends Component {
 	    sender
 	} = this.state;
 	this.setState({disabled: true});
-	try { 
-	    //     // send tx
-	    const { response, txHash, identityPK: newIdentityPK }  = await this.props.sdk.transferByLink({
-		token: TOKEN_ADDRESS,
-		amount, sender,
-		sigSender,
-		transitPK, identityPK
-	    });
+	//try { 
+	//     // send tx
+	this.props.sdk.transferByLink({
+	    token: TOKEN_ADDRESS,
+	    amount, sender,
+	    sigSender,
+	    transitPK, identityPK
+	}).then(({ response, txHash, identityPK: newIdentityPK }) => { 
 	    console.log({response, txHash, newIdentityPK});
 	    // store pending tx Hash
-	    localStorage.setItem("LINKS_PENDING_TX_HASH", txHash);
-	    localStorage.setItem("LINKS_IDENTITY_PK", newIdentityPK);
-	    this.setState({
-		txHash
-	    });
-	    
-	    // wait for tx to be mined
-	    const txReceipt = await this.props.sdk.waitForTxReceipt(txHash);
-	    console.log({txReceipt});
-	    let newIdentity;
-	    if (this.state.newIdentity) {
-		newIdentity = txReceipt.logs[0] && txReceipt.logs[0].address;
-
-		this._saveToLocalStorage({
-		    identityPK: newIdentityPK,
-		    identity: newIdentity
+		localStorage.setItem("LINKS_PENDING_TX_HASH", txHash);
+		localStorage.setItem("LINKS_IDENTITY_PK", newIdentityPK);
+		this.setState({
+		    txHash
 		});
-	    }	
-	    
-	    this.setState({
-		txReceipt,
-		identity: identity || newIdentity
-	    });
-
-	    // #todo store identity PK in localstorage 
-	    
-	} catch (err) {
-	    console.log({err});
-	    if (err.search("Error: invalid json response at XMLHttpRequest.request.onreadystatechange") !== 0) { 
-		alert("Error while claiming tx! Details in the console");
-	    }
-	}
+		
+		// wait for tx to be mined
+	    this.props.sdk.waitForTxReceipt(txHash).then(txReceipt => {
+		console.log({txReceipt});
+		let newIdentity;
+		if (this.state.newIdentity) {
+		    newIdentity = txReceipt.logs[0] && txReceipt.logs[0].address;
+		    
+		    this._saveToLocalStorage({
+			identityPK: newIdentityPK,
+			identity: newIdentity
+		    });
+		}	
+		
+		this.setState({
+		    txReceipt,
+		    identity: identity || newIdentity
+		});
+		
+		// #todo store identity PK in localstorage 	    
+	    })
+	}).catch((err) => {
+		console.log({err});
+		if (err.search("Error: invalid json response at XMLHttpRequest.request.onreadystatechange") !== 0) { 
+		    alert("Error while claiming tx! Details in the console");
+		}
+	    })
     }
 
+    _getDeviceOS() {
+	if (/Android/i.test(navigator.userAgent)) {
+	    return 'android'
+	}
+	
+	if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+	    return 'ios'
+	}
+
+	return 'other'
+    }    
+    
+    
     _saveToLocalStorage({identityPK, identity}) {
 	console.log("saving new identity to localstorgae");
 	localStorage.setItem("LINKS_IDENTITY_PK", identityPK);
@@ -143,6 +160,22 @@ class ClaimLink extends Component {
 	console.log("new identity saved!");
     }
     
+    _renderClaimLinks() {
+	const dailyLink = `app://dailywallet/claim${this.props.location.search}`;
+	const btnClass = this.state.disabled ? "btn fullwidth disabled" : "btn fullwidth";
+	if (this._getDeviceOS() === 'android') { 
+	    return (
+		    <div>
+		    <div style={{marginTop: 20}}>
+		    <a style={{width: 100, padding:10}} className={btnClass} href={dailyLink}> Use Daily Wallet </a>
+		    </div>		
+		    </div>	    
+	    );
+	} else {
+	    return ( <button style={{ marginTop: 20, width: 100}} className={btnClass} onClick={this.claimLink.bind(this)}> <div>Claim </div></button>);
+	}
+    }
+
     _renderClaimBtn() {
 	// if tx wasn't initiated
 	if (this.state.checkingLink) {
@@ -155,9 +188,10 @@ class ClaimLink extends Component {
 
 	
 	if (!this.state.txHash) {
-	    const btnClass = this.state.disabled ? "btn fullwidth disabled" : "btn fullwidth";
-	    return ( <button style={{ marginTop: 20, width: 100}} className={btnClass} onClick={this.claimLink.bind(this)}> <div>Claim </div></button>);
-	}
+	    return this._renderClaimLinks();
+	    // const btnClass = this.state.disabled ? "btn fullwidth disabled" : "btn fullwidth";
+	    // return ( <button style={{ marginTop: 20, width: 100}} className={btnClass} onClick={this.claimLink.bind(this)}> <div>Claim </div></button>);
+ 	}
 
 	// tx sent but not mined yet
 	if (!this.state.txReceipt) { 
