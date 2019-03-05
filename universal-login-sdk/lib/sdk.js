@@ -59,7 +59,7 @@ class EthereumIdentitySDK {
 	    sigSender,
 	    sigReceiver	    
 	);
-	console.log({isLinkValid});
+	console.log({isLinkValid, receiverPubKey});
 	if (!isLinkValid) {
 	    throw new Error("Invalid link!");
 	}
@@ -96,24 +96,16 @@ class EthereumIdentitySDK {
     }
     
     generateLink({ privateKey, token, amount, transitPrivKey=null }) {
-	console.log("in generate link")
 	// generate transit private key
 	const transitPK = transitPrivKey || this.generatePrivateKey();
-	console.log("generated transit PK");
 	const wallet = new ethers.Wallet(privateKey, this.provider);
-	console.log(" signing wallet ");	
 	const transitPubKey = new ethers.Wallet(transitPK, this.provider).address;
-	console.log("got transit PK")
 	// sign transit private key	
 	const messageHash = utils.solidityKeccak256(
 	    ['address', 'uint', 'address'],
 	    [ token, amount, transitPubKey]
 	);
-
-	console.log("calculated message Hash")
 	const sigSender = wallet.signMessage(utils.arrayify(messageHash));
-	console.log("got sig sender")
-	
 	return { sigSender, transitPK };
     }
     
@@ -173,22 +165,23 @@ class EthereumIdentitySDK {
   }
 
   async execute(message, privateKey) {
-    const url = `${this.relayerUrl}/identity/execution`;
-    const method = 'POST';
-    const finalMessage = {
-      ...this.defaultPaymentOptions, 
-      ...message, 
-      nonce: message.nonce || parseInt(await this.getNonce(message.from, privateKey), 10)
-    };
-    const signature = calculateMessageSignature(privateKey, finalMessage);
-    const body = JSON.stringify({...finalMessage, signature});
-    const response = await fetch(url, {headers, method, body});
-    const responseJson = await response.json();
-    if (response.status === 201) {
-      const receipt = await waitForTransactionReceipt(this.provider, responseJson.transaction.hash);
-      return this.getExecutionNonce(receipt.logs);
-    }
-    throw new Error(`${responseJson.error}`);
+      const url = `${this.relayerUrl}/identity/execution`;
+      const method = 'POST';
+      const finalMessage = {
+	  ...this.defaultPaymentOptions, 
+	  ...message, 
+	  nonce: message.nonce || parseInt(await this.getNonce(message.from, privateKey), 10)
+      };
+      const signature = await calculateMessageSignature(privateKey, finalMessage);
+      const body = JSON.stringify({...finalMessage, signature});
+      
+      const response = await fetch(url, {headers, method, body});
+      const responseJson = await response.json();
+      console.log({response, responseJson});
+      if (response.status === 201) {
+	  return { response, txHash: responseJson.transaction.hash };
+      }
+      throw new Error(`${responseJson.error}`);
   }
 
   async getNonce(identityAddress, privateKey) {
