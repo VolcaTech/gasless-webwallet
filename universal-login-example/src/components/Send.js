@@ -52,7 +52,7 @@ class SendForm extends Component {
     generateLink(value, balance) {
 	let { identity, identityPK } = this.state;
 	let amount = value;
-	amount = amount * 100;
+	amount = (amount * Math.pow(10,18)).toString();
 	const bal = (balance);
 	if (amount > bal) {
 	    return `Max: ${bal/100}. Not enough balance.`;
@@ -72,7 +72,7 @@ class SendForm extends Component {
 
 	return ( 
 		<div style={{paddingTop: 20, paddingBottom: 20}}>
-		<h3 style={{paddingBottom: 20}}> Your balance: ${this.state.balance / 100}</h3>
+		<h3 style={{paddingBottom: 20}}> Your balance: ${this.state.balance / Math.pow(10,18)}</h3>
 		<div>
 		<input className="input" type="text" value={this.state.amount} onChange={({target}) => this.setState({
 		    amount: target.value,

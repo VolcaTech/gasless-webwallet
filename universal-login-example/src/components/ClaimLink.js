@@ -231,7 +231,7 @@ class ClaimLink extends Component {
 	const claimTo = this.state.newIdentity ? "New account" : (<EtherscanAddressLink address={this.state.identity} />);
 	return (
 		<div>
-		<div style={{paddingTop: 10}}> Amount: ${this.state.amount / 100}</div>
+		<div style={{paddingTop: 10}}> Amount: ${this.state.amount / Math.pow(10,18)}</div>
 		<div style={{paddingTop: 10}}> Claim To: {claimTo} </div>
 		</div>
 	);

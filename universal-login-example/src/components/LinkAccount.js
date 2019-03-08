@@ -55,7 +55,7 @@ class LinkAccount extends Component {
 	if (this.state.fetchingBalance) {
 	    balance = "...";
 	} else {
-	    balance = `$${this.state.balance / 100}`;
+	    balance = `$${this.state.balance / Math.pow(10,18)}`;
 	}
 	
 	
