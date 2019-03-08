@@ -86,7 +86,7 @@ class ClaimLink extends Component {
     claimLink() {
 	console.log("In a claim link");
 	if (this.state.disabled) { return false; }
-	const {
+	let {
 	    identity, 
 	    identityPK,	    
 	    sigSender,
@@ -95,18 +95,31 @@ class ClaimLink extends Component {
 	    sender
 	} = this.state;
 	this.setState({disabled: true});
+
+	let receiverPubKey;
+	if (identityPK) { 
+	    receiverPubKey = new ethers.Wallet(identityPK).address;
+	} else {
+	    const identityWallet = ethers.Wallet.createRandom();
+	    receiverPubKey = identityWallet.address;
+	    identityPK = identityWallet.privateKey;
+	}
+	
+	
 	//try { 
 	//     // send tx
 	this.props.sdk.transferByLink({
 	    token: TOKEN_ADDRESS,
-	    amount, sender,
+	    amount,
+	    sender,
 	    sigSender,
-	    transitPK, identityPK
-	}).then(({ response, txHash, identityPK: newIdentityPK }) => { 
-	    console.log({response, txHash, newIdentityPK});
+	    transitPK,
+	    receiverPubKey
+	}).then(({ response, txHash}) => { 
+	    console.log({response, txHash});
 	    // store pending tx Hash
 		localStorage.setItem("LINKS_PENDING_TX_HASH", txHash);
-		localStorage.setItem("LINKS_IDENTITY_PK", newIdentityPK);
+		localStorage.setItem("LINKS_IDENTITY_PK", identityPK);
 		this.setState({
 		    txHash
 		});
@@ -119,7 +132,7 @@ class ClaimLink extends Component {
 		    newIdentity = txReceipt.logs[0] && txReceipt.logs[0].address;
 		    
 		    this._saveToLocalStorage({
-			identityPK: newIdentityPK,
+			identityPK: identityPK,
 			identity: newIdentity
 		    });
 		}	
