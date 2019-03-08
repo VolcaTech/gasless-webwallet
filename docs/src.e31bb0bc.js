@@ -97377,7 +97377,7 @@ function (_Component) {
       if (this.state.fetchingBalance) {
         balance = "...";
       } else {
-        balance = "$".concat(this.state.balance / 100);
+        balance = "$".concat(this.state.balance / Math.pow(10, 18));
       }
 
       return _react.default.createElement("div", {
@@ -97769,8 +97769,19 @@ function (_Component) {
           sender = _this$state2.sender;
       this.setState({
         disabled: true
-      }); //try { 
+      });
+      var receiverPubKey;
+
+      if (identityPK) {
+        receiverPubKey = new _ethers.default.Wallet(identityPK).address;
+      } else {
+        var identityWallet = _ethers.default.Wallet.createRandom();
+
+        receiverPubKey = identityWallet.address;
+        identityPK = identityWallet.privateKey;
+      } //try { 
       //     // send tx
+
 
       this.props.sdk.transferByLink({
         token: _constants.TOKEN_ADDRESS,
@@ -97778,19 +97789,17 @@ function (_Component) {
         sender: sender,
         sigSender: sigSender,
         transitPK: transitPK,
-        identityPK: identityPK
+        receiverPubKey: receiverPubKey
       }).then(function (_ref) {
         var response = _ref.response,
-            txHash = _ref.txHash,
-            newIdentityPK = _ref.identityPK;
+            txHash = _ref.txHash;
         console.log({
           response: response,
-          txHash: txHash,
-          newIdentityPK: newIdentityPK
+          txHash: txHash
         }); // store pending tx Hash
 
         localStorage.setItem("LINKS_PENDING_TX_HASH", txHash);
-        localStorage.setItem("LINKS_IDENTITY_PK", newIdentityPK);
+        localStorage.setItem("LINKS_IDENTITY_PK", identityPK);
 
         _this3.setState({
           txHash: txHash
@@ -97807,7 +97816,7 @@ function (_Component) {
             newIdentity = txReceipt.logs[0] && txReceipt.logs[0].address;
 
             _this3._saveToLocalStorage({
-              identityPK: newIdentityPK,
+              identityPK: identityPK,
               identity: newIdentity
             });
           }
@@ -97932,7 +97941,7 @@ function (_Component) {
         style: {
           paddingTop: 10
         }
-      }, " Amount: $", this.state.amount / 100), _react.default.createElement("div", {
+      }, " Amount: $", this.state.amount / Math.pow(10, 18)), _react.default.createElement("div", {
         style: {
           paddingTop: 10
         }
@@ -98218,7 +98227,7 @@ function (_Component) {
           identity = _this$state.identity,
           identityPK = _this$state.identityPK;
       var amount = value;
-      amount = amount * 100;
+      amount = (amount * Math.pow(10, 18)).toString();
       var bal = balance;
 
       if (amount > bal) {
@@ -98254,7 +98263,7 @@ function (_Component) {
         style: {
           paddingBottom: 20
         }
-      }, " Your balance: $", this.state.balance / 100), _react.default.createElement("div", null, _react.default.createElement("input", {
+      }, " Your balance: $", this.state.balance / Math.pow(10, 18)), _react.default.createElement("div", null, _react.default.createElement("input", {
         className: "input",
         type: "text",
         value: this.state.amount,
@@ -98556,7 +98565,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63729" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63025" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
